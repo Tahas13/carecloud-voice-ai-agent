@@ -13,6 +13,7 @@ on. Security: requests must carry the shared secret in ``X-Vapi-Secret``.
 
 import json
 import logging
+import re
 import uuid as uuid_lib
 from datetime import date, timedelta
 
@@ -158,16 +159,46 @@ def tool_update_patient(db: Session, args: dict) -> str:
     )
 
 
+_WEEKDAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+
+
 def tool_schedule_appointment(db: Session, args: dict) -> str:
-    """Bonus: mock appointment scheduling. No real calendar behind it."""
-    preferred_day = str(args.get("preferred_day", "")).strip() or "next available weekday"
-    preferred_time = str(args.get("preferred_time", "")).strip() or "morning"
+    """Bonus: mock appointment scheduling. No real calendar behind it.
+
+    Honors the requested weekday (next occurrence) and requested hour when we
+    can parse them, so the read-back matches what the caller asked for.
+    """
+    preferred_day = str(args.get("preferred_day", "")).strip()
+    preferred_time = str(args.get("preferred_time", "")).strip()
+
+    # Next occurrence of the requested weekday; otherwise 3 days out.
     slot_date = date.today() + timedelta(days=3)
+    for idx, day_name in enumerate(_WEEKDAYS):
+        if day_name in preferred_day.lower():
+            days_ahead = (idx - date.today().weekday()) % 7 or 7
+            slot_date = date.today() + timedelta(days=days_ahead)
+            break
+
+    # Use the requested hour if stated; otherwise map morning/afternoon.
+    hour_match = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm|a\.m\.|p\.m\.)?", preferred_time.lower())
+    if hour_match:
+        hour = int(hour_match.group(1))
+        minute = int(hour_match.group(2) or 0)
+        meridiem = (hour_match.group(3) or "").replace(".", "")
+        if meridiem == "pm" and hour < 12:
+            hour += 12
+        elif not meridiem and hour < 8:  # bare "2" almost always means 2 PM
+            hour += 12
+    elif "morn" in preferred_time.lower():
+        hour, minute = 10, 0
+    else:
+        hour, minute = 14, 30
+    slot_time = f"{(hour - 12) if hour > 12 else hour}:{minute:02d} {'PM' if hour >= 12 else 'AM'}"
+
     confirmation = f"APT-{uuid_lib.uuid4().hex[:6].upper()}"
     return (
-        f"APPOINTMENT BOOKED (mock): {slot_date.strftime('%A, %B %d')} at "
-        f"{'10:00 AM' if 'morn' in preferred_time.lower() else '2:30 PM'} "
-        f"(requested: {preferred_day} {preferred_time}). Confirmation code {confirmation}. "
+        f"APPOINTMENT BOOKED (mock): {slot_date.strftime('%A, %B %d')} at {slot_time}. "
+        f"Confirmation code {confirmation}. "
         "Read the date, time, and confirmation code back to the caller."
     )
 
@@ -211,12 +242,20 @@ async def vapi_webhook(
     db: Session = Depends(get_db),
     x_vapi_secret: str = Header(default=""),
 ):
-    if settings.vapi_webhook_secret and x_vapi_secret != settings.vapi_webhook_secret:
-        raise HTTPException(status_code=401, detail="Invalid webhook secret.")
-
     body = await request.json()
     message = body.get("message") or {}
     msg_type = message.get("type", "")
+
+    # Vapi reliably forwards the per-tool `server.secret` on tool-calls, but
+    # (observed in testing) sends an empty X-Vapi-Secret on assistant-level
+    # messages like end-of-call-report. So: strictly authenticate tool-calls
+    # (they mutate patient data); accept analysis-only messages that merely
+    # append call logs, logging a warning when the secret is absent.
+    secret_ok = not settings.vapi_webhook_secret or x_vapi_secret == settings.vapi_webhook_secret
+    if not secret_ok:
+        if msg_type == "tool-calls" or msg_type == "":
+            raise HTTPException(status_code=401, detail="Invalid webhook secret.")
+        logger.warning("Vapi message type=%s arrived without a valid secret; accepting (log-only message).", msg_type)
 
     if msg_type == "tool-calls":
         results = []

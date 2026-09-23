@@ -42,6 +42,21 @@ class TestSecurity:
         )
         assert resp.status_code == 401
 
+    def test_end_of_call_report_accepted_without_secret(self, client, db_session):
+        # Vapi does not forward the secret on assistant-level messages; these
+        # only append call logs, so they are accepted (with a logged warning).
+        payload = {
+            "message": {
+                "type": "end-of-call-report",
+                "endedReason": "assistant-ended-call",
+                "call": {"id": "no-secret-call"},
+                "analysis": {"structuredData": {}},
+            }
+        }
+        resp = client.post("/vapi/webhook", json=payload)
+        assert resp.status_code == 200
+        assert db_session.scalars(select(CallLog)).one().vapi_call_id == "no-secret-call"
+
 
 class TestValidateFieldTool:
     def test_valid_value(self, client):
