@@ -10,9 +10,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import validators as v
+from app.config import get_settings
 from app.database import get_db
 from app.models import CallLog, Patient
 from app.services import patient_service
+
+settings = get_settings()
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"], include_in_schema=False)
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parents[1] / "templates"))
@@ -39,17 +42,24 @@ def dashboard(
     call_counts = {
         p.patient_id: len([c for c in p.call_logs]) for p in patients
     }
-    recent_calls = list(
-        db.scalars(select(CallLog).order_by(CallLog.created_at.desc()).limit(10)).all()
-    )
+    all_calls = list(db.scalars(select(CallLog).order_by(CallLog.created_at.desc())).all())
     return templates.TemplateResponse(
         request,
         "dashboard.html",
         {
             "patients": patients,
             "call_counts": call_counts,
-            "recent_calls": recent_calls,
+            "recent_calls": all_calls[:10],
             "q": q or "",
+            "stats": {
+                "patients": len(patients),
+                "calls": len(all_calls),
+                "completed": sum(1 for c in all_calls if c.status == "completed"),
+            },
+            "agent_phone": settings.agent_phone_number,
+            "agent_phone_tel": "".join(ch for ch in settings.agent_phone_number if ch.isdigit() or ch == "+"),
+            "vapi_public_key": settings.vapi_public_key,
+            "vapi_assistant_id": settings.vapi_assistant_id,
         },
     )
 

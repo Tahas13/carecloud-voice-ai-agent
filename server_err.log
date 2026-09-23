@@ -1,23 +1,4 @@
-INFO:     Started server process [40816]
+INFO:     Started server process [27428]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8123 (Press CTRL+C to quit)
-2026-09-24 01:38:19,216 WARNING carecloud.vapi Vapi message type=end-of-call-report arrived without a valid secret; accepting (log-only message).
-2026-09-24 01:38:19,235 INFO carecloud.calls END-OF-CALL call_id=01a0cff2-5fa8-7ff7-bebd-d40d98cb0740 status=completed patient_id=22c7d30e-afb6-446f-b509-b93d967d1d0e caller=None structured_data={'sex': 'Male', 'city': 'Archie', 'state': 'N', 'zip_code': '55932', 'last_name': 'Sharis', 'first_name': 'Eha', 'phone_number': '2033217559', 'date_of_birth': 'July 12 2004', 'address_line_1': '58315 Rap Fire Soon', 'address_line_2': 'A3 Apartment', 'registration_completed': True}
-2026-09-24 01:40:52,246 WARNING carecloud.vapi Vapi message type=status-update arrived without a valid secret; accepting (log-only message).
-2026-09-24 01:40:52,248 INFO carecloud.vapi CALL STATUS in-progress call_id=01a0cfff-c2ea-7dd2-ad68-e09d23e89dc5
-2026-09-24 01:42:08,126 INFO carecloud.vapi TOOL CALL validate_patient_field args={"field": "date_of_birth", "value": "07/13/2004"}
-2026-09-24 01:42:08,133 INFO carecloud.vapi TOOL RESULT validate_patient_field -> VALID. Normalized value for date_of_birth: 07/13/2004
-2026-09-24 01:42:32,881 INFO carecloud.vapi TOOL CALL validate_patient_field args={"field": "phone_number", "value": "2033217559"}
-2026-09-24 01:42:32,882 INFO carecloud.vapi TOOL RESULT validate_patient_field -> VALID. Normalized value for phone_number: 2033217559
-2026-09-24 01:42:34,041 INFO carecloud.vapi TOOL CALL lookup_patient_by_phone args={"phone_number": "2033217559"}
-2026-09-24 01:42:34,045 INFO carecloud.vapi TOOL RESULT lookup_patient_by_phone -> EXISTING PATIENT FOUND: patient_id=22c7d30e-afb6-446f-b509-b93d967d1d0e. Record: Eha Sharis, DOB 07/12/2004, phone 2033217559, address 58315 A3 Rap Fire Soon, Apartment, Archie, ND 55932. Ask the caller: 'It looks like we already have a record for Eha Sharis. Would you like to update your information instead?' If they want to update, use the update_patient tool with this patient_id. If it is a different person, proceed with a new registration.
-2026-09-24 01:43:06,438 INFO carecloud.vapi TOOL CALL update_patient args={"patient_id": "22c7d30e-afb6-446f-b509-b93d967d1d0e", "first_name": "Taha", "last_name": "Sharif", "date_of_birth": "07/13/2004"}
-2026-09-24 01:43:06,456 INFO carecloud.vapi UPDATED PATIENT 22c7d30e-afb6-446f-b509-b93d967d1d0e fields=['first_name', 'last_name', 'date_of_birth']
-2026-09-24 01:43:06,456 INFO carecloud.vapi TOOL RESULT update_patient -> SUCCESS: record updated for Taha Sharif. Current record: Taha Sharif, DOB 07/13/2004, phone 2033217559, address 58315 A3 Rap Fire Soon, Apartment, Archie, ND 55932.
-2026-09-24 01:43:28,610 INFO carecloud.vapi TOOL CALL schedule_appointment args={"patient_id": "22c7d30e-afb6-446f-b509-b93d967d1d0e", "preferred_time": "10 PM"}
-2026-09-24 01:43:28,611 INFO carecloud.vapi TOOL RESULT schedule_appointment -> APPOINTMENT BOOKED (mock): Sunday, September 27 at 10:00 PM. Confirmation code APT-F8BD65. Read the date, time, and confirmation code back to the caller.
-2026-09-24 01:43:50,891 WARNING carecloud.vapi Vapi message type=status-update arrived without a valid secret; accepting (log-only message).
-2026-09-24 01:43:50,893 INFO carecloud.vapi CALL STATUS ended call_id=01a0cfff-c2ea-7dd2-ad68-e09d23e89dc5
-2026-09-24 01:43:53,764 WARNING carecloud.vapi Vapi message type=end-of-call-report arrived without a valid secret; accepting (log-only message).
-2026-09-24 01:43:53,779 INFO carecloud.calls END-OF-CALL call_id=01a0cfff-c2ea-7dd2-ad68-e09d23e89dc5 status=completed patient_id=22c7d30e-afb6-446f-b509-b93d967d1d0e caller=None structured_data={'sex': 'Male', 'city': None, 'email': None, 'state': None, 'zip_code': None, 'last_name': 'Sherif', 'first_name': 'Taha', 'phone_number': '2033217559', 'date_of_birth': 'July 13 2004', 'address_line_1': None, 'address_line_2': None, 'insurance_provider': None, 'preferred_language': None, 'insurance_member_id': None, 'emergency_contact_name': None, 'registration_completed': True, 'emergency_contact_phone': None}

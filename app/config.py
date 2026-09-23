@@ -19,6 +19,14 @@ class Settings(BaseSettings):
     vapi_api_key: str = ""
     vapi_webhook_secret: str = ""
 
+    # Public (browser-safe) key + assistant id: enable the dashboard's
+    # in-browser "talk to the agent" call button when both are set.
+    vapi_public_key: str = ""
+    vapi_assistant_id: str = ""
+
+    # Display-only: the agent's phone number shown on the dashboard.
+    agent_phone_number: str = "+1 (708) 523-1081"
+
     # Optional: attach your own OpenAI key to the Vapi org (setup script only).
     openai_api_key: str = ""
 
