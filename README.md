@@ -4,12 +4,22 @@ A voice-based AI agent, reachable at a real U.S. phone number, that registers ne
 
 > **Live demo**
 >
-> - **Phone number to call:** `+1 (___) ___-____` <!-- filled in at submission -->
-> - **API base URL:** `https://<your-app>.up.railway.app` <!-- filled in at submission -->
-> - **Dashboard:** `https://<your-app>.up.railway.app/dashboard`
-> - **Interactive API docs (Swagger):** `https://<your-app>.up.railway.app/docs`
+> - **Phone number to call:** **+1 (708) 523-1081**
+> - **API base URL:** `https://oversight-succulent-balsamic.ngrok-free.dev`
+> - **Dashboard:** [https://oversight-succulent-balsamic.ngrok-free.dev/dashboard](https://oversight-succulent-balsamic.ngrok-free.dev/dashboard)
+> - **Interactive API docs (Swagger):** [https://oversight-succulent-balsamic.ngrok-free.dev/docs](https://oversight-succulent-balsamic.ngrok-free.dev/docs)
 >
-> This is a demo system — please do not provide real patient data.
+> Notes for reviewers: no credentials are needed for the API or dashboard. When opening the URL in a
+> browser, ngrok's free tier shows a one-time interstitial page — click "Visit Site" (API clients like
+> curl are unaffected). This is a demo system — please do not provide real patient data.
+>
+> **Hosting note (trade-off, documented per the assessment FAQ):** the service is deployed locally
+> behind an **ngrok static domain** rather than on Railway — my Railway trial had expired and the
+> assessment explicitly lists ngrok as an acceptable hosting path. The repo still ships a
+> `Dockerfile` + `railway.json`, so the same code deploys to Railway/Render unchanged; only
+> `PUBLIC_BASE_URL` changes (re-run `scripts/setup_vapi.py` to repoint the voice agent's webhook).
+> Data persists in SQLite on disk and survives restarts; `scripts/start_local.ps1` restores the
+> full stack (API + tunnel) after a reboot with the same public URL.
 
 ## Architecture
 

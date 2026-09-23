@@ -1,0 +1,6 @@
+INFO:     Started server process [29776]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8123 (Press CTRL+C to quit)
+2026-09-24 01:19:33,583 INFO carecloud.vapi TOOL CALL validate_patient_field args={"field": "date_of_birth", "value": "12/31/2999"}
+2026-09-24 01:19:33,594 INFO carecloud.vapi TOOL RESULT validate_patient_field -> INVALID: date_of_birth cannot be in the future. Politely re-ask the caller for date_of_birth.

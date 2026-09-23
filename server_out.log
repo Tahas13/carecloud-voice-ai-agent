@@ -1,0 +1,4 @@
+INFO:     127.0.0.1:53704 - "GET /health HTTP/1.1" 200 OK
+INFO:     2400:adc1:48c:9400:d0f2:66e7:2bd0:54f0:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     2400:adc1:48c:9400:d0f2:66e7:2bd0:54f0:0 - "POST /vapi/webhook HTTP/1.1" 200 OK
+INFO:     2400:adc1:48c:9400:d0f2:66e7:2bd0:54f0:0 - "POST /vapi/webhook HTTP/1.1" 401 Unauthorized

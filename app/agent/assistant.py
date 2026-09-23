@@ -69,7 +69,9 @@ def build_assistant(public_base_url: str, webhook_secret: str) -> dict:
         },
         "voice": {
             "provider": "vapi",
-            "voiceId": "Paige",
+            "voiceId": "Emma",  # V2 voice: natural female American voice
+            "version": 2,
+            "language": "auto",  # auto-detects language -> speaks Spanish for the bonus flow
         },
         "transcriber": {
             "provider": "deepgram",

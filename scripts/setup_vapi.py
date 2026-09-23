@@ -64,14 +64,23 @@ def main() -> None:
     numbers = resp.json()
 
     if not numbers:
-        print("No phone number on the account; creating a free Vapi US number (area code 415)...")
-        resp = requests.post(
-            f"{BASE}/phone-number",
-            headers=headers,
-            json={"provider": "vapi", "assistantId": assistant_id, "numberDesiredAreaCode": "415"},
-            timeout=60,
-        )
-        if not resp.ok:
+        print("No phone number on the account; creating a free Vapi US number...")
+        resp = None
+        for area_code in ("708", "463", "945", "415", "212", "305"):
+            resp = requests.post(
+                f"{BASE}/phone-number",
+                headers=headers,
+                json={
+                    "provider": "vapi",
+                    "assistantId": assistant_id,
+                    "numberDesiredAreaCode": area_code,
+                },
+                timeout=60,
+            )
+            if resp.ok:
+                break
+            print(f"  area code {area_code} unavailable ({resp.status_code}), trying next...")
+        if resp is None or not resp.ok:
             sys.exit(
                 f"Could not create a phone number ({resp.status_code}): {resp.text}\n"
                 "Create one manually: dashboard.vapi.ai -> Phone Numbers -> Create -> Free Vapi Number,"
