@@ -59,6 +59,7 @@
             <span id="web-call-dot" class="w-2 h-2 rounded-full bg-white"></span>
             <span id="web-call-label">Call from browser</span>
           </button>
+          <p id="web-call-error" class="mt-2 text-xs text-rose-100 hidden"></p>
           <p class="mt-2 text-[11px] text-sky-200/80">Uses your microphone — same AI agent, no phone needed.</p>
           {% else %}
           <p class="mt-4 text-xs text-sky-200/80 italic">Browser calling not configured on this deployment.</p>
@@ -197,51 +198,77 @@
   </main>
 
   {% if vapi_public_key and vapi_assistant_id %}
-  <script type="module">
-    import Vapi from "https://esm.sh/@vapi-ai/web@latest";
-
-    const vapi = new Vapi("{{ vapi_public_key }}");
+  <!-- Official browser bundle (includes a working Daily.co client). The
+       floating button it injects is hidden; our own button drives the call. -->
+  <style>#vapi-support-btn { display: none !important; }</style>
+  <script src="https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js"></script>
+  <script>
+    const PUBLIC_KEY = {{ vapi_public_key|tojson }};
+    const ASSISTANT_ID = {{ vapi_assistant_id|tojson }};
     const btn = document.getElementById("web-call-btn");
     const label = document.getElementById("web-call-label");
     const dot = document.getElementById("web-call-dot");
+    const errEl = document.getElementById("web-call-error");
     let state = "idle"; // idle | connecting | active
+    let reachedActive = false;
 
     function render() {
+      const base = "mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl text-white font-semibold px-4 py-3 shadow-lg transition-colors";
       if (state === "idle") {
         label.textContent = "Call from browser";
-        btn.className = btn.className.replace(/bg-(rose|amber)-\d+|hover:bg-(rose|amber)-\d+/g, "").trim()
-          + " bg-emerald-500 hover:bg-emerald-400";
+        btn.className = base + " bg-emerald-500 hover:bg-emerald-400";
         dot.classList.remove("animate-pulse");
       } else if (state === "connecting") {
         label.textContent = "Connecting…";
+        btn.className = base + " bg-amber-500";
         dot.classList.add("animate-pulse");
       } else {
         label.textContent = "End call";
-        btn.className = btn.className.replace(/bg-emerald-\d+|hover:bg-emerald-\d+/g, "").trim()
-          + " bg-rose-500 hover:bg-rose-400";
+        btn.className = base + " bg-rose-500 hover:bg-rose-400";
         dot.classList.add("animate-pulse");
       }
     }
 
+    function showError(msg) {
+      errEl.textContent = msg;
+      errEl.classList.remove("hidden");
+    }
+
+    const vapi = window.vapiSDK.run({ apiKey: PUBLIC_KEY, assistant: ASSISTANT_ID });
+    if (!vapi) {
+      showError("Browser calling is not configured correctly.");
+      btn.disabled = true;
+    } else {
+
     btn.addEventListener("click", async () => {
+      errEl.classList.add("hidden");
       if (state !== "idle") { vapi.stop(); return; }
       state = "connecting"; render();
       try {
-        await vapi.start("{{ vapi_assistant_id }}");
+        const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mic.getTracks().forEach((t) => t.stop());
+        await vapi.start(ASSISTANT_ID);
       } catch (err) {
         console.error(err);
         state = "idle"; render();
-        alert("Could not start the browser call: " + (err?.message || err));
+        showError(err && err.message ? err.message : "Could not start the call. Allow the microphone and try again.");
       }
     });
 
-    vapi.on("call-start", () => { state = "active"; render(); });
+    vapi.on("call-start", () => { reachedActive = true; state = "active"; render(); });
     vapi.on("call-end", () => {
+      const wasActive = reachedActive;
+      reachedActive = false;
       state = "idle"; render();
-      // Refresh shortly after the call so the new registration appears.
-      setTimeout(() => window.location.reload(), 1500);
+      if (wasActive) setTimeout(() => window.location.reload(), 1500);
     });
-    vapi.on("error", (e) => { console.error("Vapi error", e); state = "idle"; render(); });
+    vapi.on("error", (e) => {
+      console.error("Vapi error", e);
+      const msg = (e && (e.message || (e.error && (e.error.message || e.errorMsg)))) || "The call could not connect. Please try again.";
+      showError(typeof msg === "string" ? msg : "The call could not connect. Please try again.");
+      state = "idle"; render();
+    });
+    }
   </script>
   {% endif %}
 </body>
