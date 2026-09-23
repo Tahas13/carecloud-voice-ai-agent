@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ p.first_name }} {{ p.last_name }} — CareCloud</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen">
+  <header class="bg-sky-700 text-white shadow">
+    <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+      <h1 class="text-xl font-semibold">Patient Record</h1>
+      <a href="/dashboard" class="text-sky-100 text-sm hover:underline">&larr; Back to dashboard</a>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-8 space-y-8">
+    <section class="bg-white rounded-xl shadow p-6">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-2xl font-semibold text-slate-800">{{ p.first_name }} {{ p.last_name }}</h2>
+          <p class="text-sm text-slate-400 mt-1">ID: {{ p.patient_id }}</p>
+        </div>
+        {% if p.deleted_at %}
+          <span class="bg-rose-100 text-rose-700 rounded-full px-3 py-1 text-xs font-medium">Deleted {{ p.deleted_at.strftime('%m/%d/%Y') }}</span>
+        {% endif %}
+      </div>
+      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mt-6 text-sm">
+        {% for label, value in [
+          ('Date of Birth', p.date_of_birth.strftime('%m/%d/%Y')),
+          ('Sex', p.sex),
+          ('Phone', '(' ~ p.phone_number[:3] ~ ') ' ~ p.phone_number[3:6] ~ '-' ~ p.phone_number[6:]),
+          ('Email', p.email or '—'),
+          ('Address', p.address_line_1 ~ (', ' ~ p.address_line_2 if p.address_line_2 else '')),
+          ('City / State / ZIP', p.city ~ ', ' ~ p.state ~ ' ' ~ p.zip_code),
+          ('Insurance', p.insurance_provider or '—'),
+          ('Member ID', p.insurance_member_id or '—'),
+          ('Preferred Language', p.preferred_language),
+          ('Emergency Contact', (p.emergency_contact_name or '—') ~ (' · ' ~ p.emergency_contact_phone if p.emergency_contact_phone else '')),
+          ('Created (UTC)', p.created_at.strftime('%m/%d/%Y %H:%M')),
+          ('Updated (UTC)', p.updated_at.strftime('%m/%d/%Y %H:%M')),
+        ] %}
+        <div>
+          <dt class="text-xs uppercase tracking-wide text-slate-400">{{ label }}</dt>
+          <dd class="text-slate-700 mt-0.5">{{ value }}</dd>
+        </div>
+        {% endfor %}
+      </dl>
+    </section>
+
+    <section class="bg-white rounded-xl shadow overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200">
+        <h3 class="font-semibold text-slate-800">Call History ({{ calls|length }})</h3>
+      </div>
+      <div class="divide-y divide-slate-100">
+        {% for c in calls %}
+        <details class="px-6 py-4">
+          <summary class="cursor-pointer flex items-center justify-between">
+            <span class="text-sm font-medium text-slate-700">
+              {{ c.created_at.strftime('%m/%d/%Y %H:%M') }} UTC
+              <span class="ml-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium
+                {% if c.status == 'completed' %}bg-emerald-100 text-emerald-700
+                {% elif c.status == 'incomplete' %}bg-amber-100 text-amber-700
+                {% else %}bg-rose-100 text-rose-700{% endif %}">{{ c.status }}</span>
+            </span>
+            <span class="text-xs text-slate-400">{{ c.ended_reason or '' }}</span>
+          </summary>
+          {% if c.summary %}
+            <p class="mt-3 text-sm text-slate-600 bg-slate-50 rounded-lg p-3">{{ c.summary }}</p>
+          {% endif %}
+          {% if c.transcript %}
+            <pre class="mt-3 text-xs text-slate-500 bg-slate-50 rounded-lg p-3 whitespace-pre-wrap max-h-72 overflow-y-auto">{{ c.transcript }}</pre>
+          {% endif %}
+        </details>
+        {% else %}
+        <div class="px-6 py-8 text-center text-slate-400">No calls linked to this patient.</div>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareCloud — Patient Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen">
+  <header class="bg-sky-700 text-white shadow">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <h1 class="text-xl font-semibold">CareCloud — Patient Registration Dashboard</h1>
+      <a href="/docs" class="text-sky-100 text-sm hover:underline">API Docs</a>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-8 space-y-8">
+    <form method="get" action="/dashboard" class="flex gap-3">
+      <input type="text" name="q" value="{{ q }}" placeholder="Search by last name or phone number…"
+             class="flex-1 rounded-lg border border-slate-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+      <button class="bg-sky-700 text-white px-5 py-2 rounded-lg hover:bg-sky-800">Search</button>
+      {% if q %}<a href="/dashboard" class="px-4 py-2 text-slate-500 hover:text-slate-700 self-center">Clear</a>{% endif %}
+    </form>
+
+    <section class="bg-white rounded-xl shadow overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <h2 class="font-semibold text-slate-800">Registered Patients</h2>
+        <span class="text-sm text-slate-500">{{ patients|length }} record{{ '' if patients|length == 1 else 's' }}</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-slate-500 uppercase text-xs tracking-wide">
+            <tr>
+              <th class="px-6 py-3 text-left">Name</th>
+              <th class="px-6 py-3 text-left">DOB</th>
+              <th class="px-6 py-3 text-left">Phone</th>
+              <th class="px-6 py-3 text-left">City / State</th>
+              <th class="px-6 py-3 text-left">Language</th>
+              <th class="px-6 py-3 text-left">Calls</th>
+              <th class="px-6 py-3 text-left">Registered</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for p in patients %}
+            <tr class="hover:bg-sky-50">
+              <td class="px-6 py-3 font-medium">
+                <a href="/dashboard/patients/{{ p.patient_id }}" class="text-sky-700 hover:underline">
+                  {{ p.first_name }} {{ p.last_name }}
+                </a>
+              </td>
+              <td class="px-6 py-3">{{ p.date_of_birth.strftime('%m/%d/%Y') }}</td>
+              <td class="px-6 py-3">({{ p.phone_number[:3] }}) {{ p.phone_number[3:6] }}-{{ p.phone_number[6:] }}</td>
+              <td class="px-6 py-3">{{ p.city }}, {{ p.state }}</td>
+              <td class="px-6 py-3">{{ p.preferred_language }}</td>
+              <td class="px-6 py-3">
+                {% if call_counts.get(p.patient_id) %}
+                  <span class="inline-block bg-emerald-100 text-emerald-700 rounded-full px-2 py-0.5 text-xs font-medium">
+                    {{ call_counts[p.patient_id] }} call{{ '' if call_counts[p.patient_id] == 1 else 's' }}
+                  </span>
+                {% else %}<span class="text-slate-400">—</span>{% endif %}
+              </td>
+              <td class="px-6 py-3 text-slate-500">{{ p.created_at.strftime('%m/%d/%Y %H:%M') }} UTC</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="px-6 py-8 text-center text-slate-400">No patients found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-xl shadow overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200">
+        <h2 class="font-semibold text-slate-800">Recent Calls</h2>
+      </div>
+      <div class="divide-y divide-slate-100">
+        {% for c in recent_calls %}
+        <div class="px-6 py-4 flex items-start justify-between gap-4">
+          <div>
+            <div class="text-sm font-medium text-slate-700">
+              {{ c.caller_number or 'Unknown caller' }}
+              <span class="ml-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium
+                {% if c.status == 'completed' %}bg-emerald-100 text-emerald-700
+                {% elif c.status == 'incomplete' %}bg-amber-100 text-amber-700
+                {% else %}bg-rose-100 text-rose-700{% endif %}">{{ c.status }}</span>
+            </div>
+            {% if c.summary %}<p class="text-sm text-slate-500 mt-1">{{ c.summary }}</p>{% endif %}
+          </div>
+          <div class="text-xs text-slate-400 whitespace-nowrap">
+            {{ c.created_at.strftime('%m/%d %H:%M') }} UTC
+            {% if c.patient_id %}
+              · <a class="text-sky-600 hover:underline" href="/dashboard/patients/{{ c.patient_id }}">patient</a>
+            {% endif %}
+          </div>
+        </div>
+        {% else %}
+        <div class="px-6 py-8 text-center text-slate-400">No calls logged yet.</div>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+</body>
+</html>
