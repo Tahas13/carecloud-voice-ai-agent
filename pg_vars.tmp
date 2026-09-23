@@ -1,0 +1,36 @@
+﻿DATABASE_URL=postgresql://postgres:iBtLRFimgDHIGshUmzOgSDLxBInVMoUP@postgres.railway.internal:5432/railway
+PGDATA=/var/lib/postgresql/data/pgdata
+PGDATABASE=railway
+PGHOST=postgres.railway.internal
+PGPASSWORD=iBtLRFimgDHIGshUmzOgSDLxBInVMoUP
+PGPORT=5432
+PGUSER=postgres
+POSTGRES_DB=railway
+POSTGRES_PASSWORD=iBtLRFimgDHIGshUmzOgSDLxBInVMoUP
+POSTGRES_USER=postgres
+RAILWAY_DEPLOYMENT_DRAINING_SECONDS=60
+RAILWAY_ENVIRONMENT=production
+RAILWAY_ENVIRONMENT_ID=5b05bd1c-be40-4954-ac6b-f8f5518758a6
+RAILWAY_ENVIRONMENT_NAME=production
+RAILWAY_PRIVATE_DOMAIN=postgres.railway.internal
+RAILWAY_PROJECT_ID=bcf7652f-9b18-4287-a98e-59f5ee9baf54
+RAILWAY_PROJECT_NAME=carecloud-voice-agent
+RAILWAY_SERVICE_CARECLOUD_API_URL=carecloud-api-production-7306.up.railway.app
+RAILWAY_SERVICE_ID=a84655c0-5b03-480b-bc59-526b964bba57
+RAILWAY_SERVICE_NAME=Postgres
+RAILWAY_VOLUME_ID=4c3d2f47-5eec-4cbb-95e8-765cc3c4f01d
+RAILWAY_VOLUME_MOUNT_PATH=/var/lib/postgresql/data
+RAILWAY_VOLUME_NAME=postgres-volume
+SSL_CERT_DAYS=820
+node.exe : warning: Config as Code (railway.json / railway.toml) is deprecated. Prefer Infrastructure as Code 
+(.railway/railway.ts). Run `railway config migrate` or see 
+https://docs.railway.com/infrastructure-as-code#migrating-from-config-as-code
+At C:\Users\TAHA\AppData\Roaming\npm\railway.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/@railway/cli/bin/railway.js" ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: Config...-config-as-code:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  ΓåÆ Migrate: `railway config migrate` ΓÇö 
+https://docs.railway.com/infrastructure-as-code#migrating-from-config-as-code
+  Existing files keep working until 2026-12-01.
